@@ -6,13 +6,7 @@
 #include "WavFileWriter.h"
 #include "Utility.h"
 
-
-int main()
-{
-    std::cout << "SoundStreamLink" << std::endl;
-    std::cout << std::endl;
-    std::cout << "Main Thread Initializing" << std::endl;
-    
+void Debug(std::string debugFile) {
     HRESULT hr = CoInitialize(NULL);
     CheckHresult(hr, "CoInitialize");
 
@@ -78,9 +72,103 @@ int main()
     std::vector<BYTE> readBuffer(neededCapacity, 0);
     std::cout << "readBuffer.size(): " << readBuffer.size() << std::endl;
     size_t readFrames = audioCapture->BufferReadAll(readBuffer.data());
-    WavFileWriter::WriteWaveFile("output.wav", readBuffer, *pFormat);
+    WavFileWriter::WriteWaveFile(debugFile, readBuffer, *pFormat);
     std::cout << "wav file saved" << std::endl;
 
     CoUninitialize();
+}
+
+void PrintUsage() {
+    std::cout << "SoundStreamLink.exe  [mode option] [other options]" << std::endl;
+    std::cout << "modes (mandatory):" << std::endl;
+    std::cout << "-s     Server" << std::endl;
+    std::cout << "-c     Client" << std::endl;
+    std::cout << "-d     Debug" << std::endl;
+    std::cout << "options (complementary):" << std::endl;
+    std::cout << "-sa    For client mode. Specify server address." << std::endl;
+    std::cout << "-sp    For server and client mode. Specify server port." << std::endl;
+    std::cout << "-ca    For server mode. Specify client address." << std::endl;
+    std::cout << "-cp    For server and client mode. Specify client port." << std::endl;
+    std::cout << "-df    For debug mode. Specify output path." << std::endl;
+}
+
+int main(int argc, char** argv) {
+    if (argc < 2) {
+        std::cerr << "Error! No arguments. To start the program, please give a mode option (-s or -c)." << std::endl << std::endl;
+        PrintUsage();
+        return 1;
+    }
+
+    bool debugMode = false;
+    bool serverMode = false;
+    bool clientMode = false;
+    std::string debugFile;
+    std::string serverAddress;
+    int serverPort = 0;
+    std::string clientAddress;
+    int clientPort = 0;
+
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+
+        if (arg == "-d") {
+            debugMode = true;
+        }
+        else if (arg == "-s") {
+            serverMode = true;
+        }
+        else if (arg == "-c") {
+            clientMode = true;
+        }
+        else if (arg == "-df" && i + 1 < argc) {
+            debugFile = argv[++i];
+        }
+        else if (arg == "-sa" && i + 1 < argc) {
+            serverAddress = argv[++i];
+        }
+        else if (arg == "-sp" && i + 1 < argc) {
+            serverPort = std::stoi(argv[++i]);
+        }
+        else if (arg == "-ca" && i + 1 < argc) {
+            clientAddress = argv[++i];
+        }
+        else if (arg == "-cp" && i + 1 < argc) {
+            clientPort = std::stoi(argv[++i]);
+        }
+    }
+
+    if (debugMode + serverMode + clientMode != 1) {
+        std::cerr << "Error! Conflicted Modes. To start the program, please give the only one mode option (-s or -c)." << std::endl << std::endl;
+        PrintUsage();
+        return 1;
+    }
+
+    if (debugMode) {
+        std::cout << "Mode: Debug" << std::endl;
+        if (!debugFile.empty()) {
+            debugFile = "debug.wav";
+        }
+        std::cout << "Debug File: " << debugFile << std::endl;
+        Debug(debugFile);
+    }
+    else if (serverMode) {
+        std::cout << "Mode: Server" << std::endl;
+        if (!serverAddress.empty()) {
+            std::cout << "サーバーアドレス: " << serverAddress << std::endl;
+        }
+        if (serverPort) {
+            std::cout << "サーバーポート: " << serverPort << std::endl;
+        }
+    }
+    else if (clientMode) {
+        std::cout << "Mode: Client" << std::endl;
+        if (!clientAddress.empty()) {
+            std::cout << "クライアントアドレス: " << clientAddress << std::endl;
+        }
+        if (clientPort) {
+            std::cout << "クライアントポート: " << clientPort << std::endl;
+        }
+    }
+
     return 0;
 }
