@@ -27,6 +27,7 @@ DWORD AudioCapture::WASAPICaptureThread() {
     {
         hr = pCaptureClient->GetBuffer(&pData, &numFramesToRead, &flags, &u64DevicePosition, &u64QPCPosition);
         CheckHresult(hr, "pCaptureClient->GetBuffer");
+#ifdef DEBUG
         std::cout << "numFramesToRead: " << numFramesToRead << std::endl;
         std::cout << "numFramesToRead (in milliseconds): " << static_cast<double>(numFramesToRead) / pFormat->nSamplesPerSec * 1000 << std::endl;
         std::cout << "flags: " << std::hex << flags << std::oct << std::endl;
@@ -41,7 +42,7 @@ DWORD AudioCapture::WASAPICaptureThread() {
         std::cout << "Buffer->TotalZeroFilledFrames: " << ringBuffer->GetTotalZeroFilledFrames() << std::endl;
         std::cout << "Buffer->CurrentValidFrames: " << ringBuffer->GetCurrentValidFrames() << std::endl;
         std::cout << "Buffer->CurrentZeroFilledFrames: " << ringBuffer->GetCurrentZeroFilledFrames() << std::endl;
-
+#endif // DEBUG
         if (numFramesToRead > 0) {
             mtx.lock();
             ringBuffer->Write(u64DevicePosition, pData, numFramesToRead);
