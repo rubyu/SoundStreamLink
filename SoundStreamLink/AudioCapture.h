@@ -31,4 +31,7 @@ public:
     size_t GetTotalZeroFilledFrames() const;
     size_t GetCurrentValidFrames() const;
     size_t GetCurrentZeroFilledFrames() const;
+
+    void addUpdateListener(std::unique_ptr<IBufferUpdateListener>&& newListener);
+    void clearUpdateListeners();
 };

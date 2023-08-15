@@ -133,3 +133,12 @@ size_t AudioCapture::GetCurrentValidFrames() const {
 size_t AudioCapture::GetCurrentZeroFilledFrames() const {
     return ringBuffer->GetCurrentZeroFilledFrames();
 }
+
+
+void AudioCapture::addUpdateListener(std::unique_ptr<IBufferUpdateListener>&& newListener) {
+    ringBuffer->addUpdateListener(std::move(newListener));
+}
+
+void AudioCapture::clearUpdateListeners() {
+    ringBuffer->clearUpdateListeners();
+}

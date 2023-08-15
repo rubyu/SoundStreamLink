@@ -1,4 +1,6 @@
 #include "Utility.h"
+#include <codecvt>
+#include <locale>
 
 void CheckHresult(HRESULT hr, const char* failedOperation) {
     if (!FAILED(hr)) return;
@@ -17,18 +19,24 @@ void CheckHandle(HANDLE handle, const char* failedOperation) {
     throw std::runtime_error(errorMessage.get());
 }
 
-void CheckWSAStartupResult(int result, const char* failedOperation) {
-    ReturnMustCodeBeZero(result, failedOperation);
-}
-
-void CheckSocket(int result, const char* failedOperation) {
-    ReturnMustCodeBeZero(result, failedOperation);
-}
-
-void ReturnMustCodeBeZero(int result, const char* failedOperation) {
-    if (result == 0) return;
+void CheckSocket(SOCKET socket, const char* failedOperation) {
+    if (INVALID_SOCKET != socket) return;
     const size_t bufferSize = 1024;
     auto errorMessage = std::make_unique<char[]>(bufferSize);
-    sprintf_s(errorMessage.get(), bufferSize, "'%s' failed with ReturnCode: %d (0x%08X)\n", failedOperation, result, result);
+    sprintf_s(errorMessage.get(), bufferSize, "'%s' failed because INVALID_SOCKET '%d (0x%08X)' == given socket '%d (0x%08X)'\n", failedOperation, INVALID_SOCKET, INVALID_SOCKET, socket, socket);
     throw std::runtime_error(errorMessage.get());
+}
+
+void MustEquals(int expected, int actual, const char* failedOperation) {
+    if (expected == actual) return;
+    const size_t bufferSize = 1024;
+    auto errorMessage = std::make_unique<char[]>(bufferSize);
+    sprintf_s(errorMessage.get(), bufferSize, "'%s' failed because expected value '%d (0x%08X)' != actual value '%d (0x%08X)'\n", failedOperation, expected, expected, actual, actual);
+    throw std::runtime_error(errorMessage.get());
+}
+
+
+std::wstring to_wstring(const std::string& stringToConvert) {
+    std::wstring wideString = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(stringToConvert);
+    return wideString;
 }

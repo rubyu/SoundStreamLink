@@ -6,6 +6,7 @@
 #include <iostream>
 #include <Mmdeviceapi.h>
 #include <functiondiscoverykeys.h>
+#include "IBufferUpdateListener.h"
 
 class RingBuffer {
 private:
@@ -25,6 +26,10 @@ private:
     size_t currentZeroFilledFrames;
     std::set<size_t> zeroFilledPositions;
 
+    // listener feature
+    std::vector<std::unique_ptr<IBufferUpdateListener>> updateListeners;
+
+    // buffer oparations
     void IncrementHead();
     void IncrementTail();
     void IncrementTailZerofill();
@@ -32,7 +37,7 @@ private:
 
 public:
     RingBuffer(const WAVEFORMATEX& format, size_t numFrames);
-    void Write(UINT64 u64DevicePosition, const BYTE* data, size_t numFrames);
+    void Write(UINT64 u64DevicePosition, BYTE* data, size_t numFrames);
     size_t Read(UINT64 u64DevicePosition, BYTE* output, size_t numFrames);
     size_t ReadAll(BYTE* output);
 
@@ -40,4 +45,7 @@ public:
     size_t GetTotalZeroFilledFrames() const;
     size_t GetCurrentValidFrames() const;
     size_t GetCurrentZeroFilledFrames() const;
+
+    void addUpdateListener(std::unique_ptr<IBufferUpdateListener>&& newTransmitter);
+    void clearUpdateListeners();
 };
