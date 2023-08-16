@@ -1,4 +1,5 @@
 #include "AudioCapture.h"
+#include <bitset>
 #include <avrt.h>
 #pragma comment(lib, "avrt.lib")
 #include "Utility.h"
@@ -30,7 +31,7 @@ DWORD AudioCapture::WASAPICaptureThread() {
 #ifdef DEBUG
         std::cout << "numFramesToRead: " << numFramesToRead << std::endl;
         std::cout << "numFramesToRead (in milliseconds): " << static_cast<double>(numFramesToRead) / pFormat->nSamplesPerSec * 1000 << std::endl;
-        std::cout << "flags: " << std::hex << flags << std::oct << std::endl;
+        std::cout << "flags: " << std::bitset<32>(flags) << std::dec << std::endl;
         std::cout << "flags->AUDCLNT_BUFFERFLAGS_SILENT: " << (flags & AUDCLNT_BUFFERFLAGS_SILENT) << std::endl;
         std::cout << "flags->AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY: " << (flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) << std::endl;
         std::cout << "flags->AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR: " << (flags & AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR) << std::endl;
