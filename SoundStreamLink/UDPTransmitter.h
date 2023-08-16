@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include <winsock2.h>
 #include <Audioclient.h>
 #include "AudioPacket.h"
@@ -11,7 +12,7 @@ private:
     SOCKET udpSocket;
     sockaddr_in destAddr;
 
-    AudioPacket packet;
+    std::unique_ptr<AudioPacket> packet;
 
 public:
     UDPTransmitter(WAVEFORMATEX* _waveFormat, std::string destIP, unsigned short destPort);

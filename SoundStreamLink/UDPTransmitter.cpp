@@ -5,9 +5,12 @@
 #include "Utility.h"
 
 UDPTransmitter::UDPTransmitter(WAVEFORMATEX* pFormat, std::string destIp, unsigned short destPort) {
-    packet.SamplingRate = pFormat->nSamplesPerSec;
-    packet.Channels = pFormat->nChannels;
-    packet.BitsPerSample = pFormat->wBitsPerSample;
+    packet = std::make_unique<AudioPacket>(pFormat->nSamplesPerSec, pFormat->nChannels, pFormat->wBitsPerSample);
+    
+    std::cout << "AudioPacket's address:" << packet.get() << std::endl;
+    std::cout << "AudioPacket(SamplingRate=" << packet->SamplingRate << ", Channels=" << packet->Channels <<
+        ", BitsPerSample=" << packet->BitsPerSample << ", UpstreamDevicePosition=" << packet->UpstreamDevicePosition <<
+        ", Frames=" << packet->Frames << ", DataSize=" << packet->DataSize << ")" << std::endl;
 
     std::wstring wDestIp = to_wstring(destIp);
 
@@ -22,6 +25,14 @@ UDPTransmitter::UDPTransmitter(WAVEFORMATEX* pFormat, std::string destIp, unsign
     destAddr.sin_family = AF_INET;
     destAddr.sin_port = htons(destPort);
     MustEquals(1, InetPton(AF_INET, wDestIp.c_str(), &destAddr.sin_addr), "InetPton()");
+
+
+    std::cout << "AudioPacket's address:" << packet.get() << std::endl;
+    std::cout << "AudioPacket(SamplingRate=" << packet->SamplingRate << ", Channels=" << packet->Channels <<
+        ", BitsPerSample=" << packet->BitsPerSample << ", UpstreamDevicePosition=" << packet->UpstreamDevicePosition <<
+        ", Frames=" << packet->Frames << ", DataSize=" << packet->DataSize << ")" << std::endl;
+
+
 }
 
 UDPTransmitter::~UDPTransmitter() {
@@ -31,30 +42,41 @@ UDPTransmitter::~UDPTransmitter() {
 
 void UDPTransmitter::bufferUpdated(UINT64 u64DevicePosition, BYTE* data, size_t numFrames) {
     std::cout << "bufferUpdated" << std::endl;
+    /*
+    packet.UpstreamDevicePosition = u64DevicePosition;
+    packet.Frames = numFrames;
     packet.Data = data;
     packet.DataSize = numFrames * (packet.Channels * (packet.BitsPerSample / 8));
 
     int headerSize = sizeof(packet.SamplingRate) + sizeof(packet.Channels) + sizeof(packet.BitsPerSample)
-        + sizeof(packet.UpstreamDevicePosition) + sizeof(packet.AUDCLNT_BUFFERFLAGS_SILENT)
-        + sizeof(packet.AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) + sizeof(packet.AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR)
-        + sizeof(packet.Frames) + sizeof(packet.DataSize);
+        + sizeof(packet.UpstreamDevicePosition) + sizeof(packet.Frames) + sizeof(packet.DataSize);
     int totalSize = headerSize + packet.DataSize;
     BYTE* buffer = new BYTE[totalSize];
 
     BYTE* ptr = buffer;
+    */
+
+    /*
     memcpy(ptr, &packet.SamplingRate, sizeof(packet.SamplingRate)); ptr += sizeof(packet.SamplingRate);
     memcpy(ptr, &packet.Channels, sizeof(packet.Channels)); ptr += sizeof(packet.Channels);
     memcpy(ptr, &packet.BitsPerSample, sizeof(packet.BitsPerSample)); ptr += sizeof(packet.BitsPerSample);
     memcpy(ptr, &packet.UpstreamDevicePosition, sizeof(packet.UpstreamDevicePosition)); ptr += sizeof(packet.UpstreamDevicePosition);
-    memcpy(ptr, &packet.AUDCLNT_BUFFERFLAGS_SILENT, sizeof(packet.AUDCLNT_BUFFERFLAGS_SILENT)); ptr += sizeof(packet.AUDCLNT_BUFFERFLAGS_SILENT);
-    memcpy(ptr, &packet.AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY, sizeof(packet.AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY)); ptr += sizeof(packet.AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY);
-    memcpy(ptr, &packet.AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR, sizeof(packet.AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR)); ptr += sizeof(packet.AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR);
     memcpy(ptr, &packet.Frames, sizeof(packet.Frames)); ptr += sizeof(packet.Frames);
     memcpy(ptr, &packet.DataSize, sizeof(packet.DataSize)); ptr += sizeof(packet.DataSize);
     memcpy(ptr, packet.Data, packet.DataSize);
+    */
 
+    std::cout << "AudioPacket's address:" << packet.get() << std::endl;
+    std::cout << "AudioPacket(SamplingRate=" << packet->SamplingRate << ", Channels=" << packet->Channels <<
+        ", BitsPerSample=" << packet->BitsPerSample << ", UpstreamDevicePosition=" << packet->UpstreamDevicePosition <<
+        ", Frames=" << packet->Frames << ", DataSize=" << packet->DataSize << ")" << std::endl;
+
+
+    /*
     std::cout << "UDP packet sending" << std::endl;
     sendto(udpSocket, (const char*)buffer, totalSize, 0, (struct sockaddr*)&destAddr, sizeof(destAddr));
     std::cout << "UDP packet sent" << std::endl;
+
     delete[] buffer;
+    */
 }

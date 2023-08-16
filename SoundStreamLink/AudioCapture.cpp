@@ -18,11 +18,11 @@ DWORD AudioCapture::WASAPICaptureThread() {
     CheckHandle(handle, "AvSetMmThreadCharacteristics");
     std::cout << "taskIndex: " << taskIndex << std::endl;
 
-    UINT32 numFramesToRead;
-    UINT64 u64DevicePosition;
-    UINT64 u64QPCPosition;
-    DWORD flags;
-    BYTE* pData;
+    UINT32 numFramesToRead = 0;
+    UINT64 u64DevicePosition = 0;
+    UINT64 u64QPCPosition = 0;
+    DWORD flags = NULL;
+    BYTE* pData = NULL;
     while (!terminated)
     {
         hr = pCaptureClient->GetBuffer(&pData, &numFramesToRead, &flags, &u64DevicePosition, &u64QPCPosition);
