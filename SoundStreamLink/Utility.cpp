@@ -23,7 +23,7 @@ void CheckSocket(SOCKET socket, const char* failedOperation) {
     if (INVALID_SOCKET != socket) return;
     const size_t bufferSize = 1024;
     auto errorMessage = std::make_unique<char[]>(bufferSize);
-    sprintf_s(errorMessage.get(), bufferSize, "'%s' failed because INVALID_SOCKET '%d (0x%08X)' == given socket '%d (0x%08X)'\n", failedOperation, INVALID_SOCKET, INVALID_SOCKET, socket, socket);
+    sprintf_s(errorMessage.get(), bufferSize, "'%s' failed because INVALID_SOCKET '%Id (0x%I64X)' == given socket '%Id (0x%I64X)'\n", failedOperation, INVALID_SOCKET, INVALID_SOCKET, socket, socket);
     throw std::runtime_error(errorMessage.get());
 }
 

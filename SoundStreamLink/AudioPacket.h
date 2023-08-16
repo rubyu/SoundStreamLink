@@ -11,10 +11,17 @@ struct AudioPacket {
 
     // Audio packet.
     UINT64 UpstreamDevicePosition;
-    bool AUDCLNT_BUFFERFLAGS_SILENT;
-    bool AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY;
-    bool AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR;
     UINT32 Frames;
     UINT32 DataSize;
     BYTE* Data;
+
+    AudioPacket() :
+        SamplingRate(0),
+        Channels(0),
+        BitsPerSample(0),
+        UpstreamDevicePosition(0),
+        Frames(0),
+        DataSize(0),
+        Data(nullptr)
+    {}
 };

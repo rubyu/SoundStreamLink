@@ -128,14 +128,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AudioCapture.cpp" />
+    <ClCompile Include="IBufferUpdateListener.h" />
     <ClCompile Include="RingBuffer.cpp" />
     <ClCompile Include="SoundStreamLink.cpp" />
+    <ClCompile Include="UDPReceiver.cpp" />
+    <ClCompile Include="UDPTransmitter.cpp" />
     <ClCompile Include="Utility.cpp" />
     <ClCompile Include="WavFileWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioCapture.h" />
+    <ClInclude Include="AudioPacket.h" />
     <ClInclude Include="RingBuffer.h" />
+    <ClInclude Include="UDPReceiver.h" />
+    <ClInclude Include="UDPTransmitter.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="WavFileWriter.h" />
   </ItemGroup>

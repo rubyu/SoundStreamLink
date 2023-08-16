@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <memory>
 #include <winsock2.h>
 #include <Audioclient.h>
 #include "AudioPacket.h"
@@ -11,7 +13,9 @@ private:
     SOCKET udpSocket;
     sockaddr_in destAddr;
 
-    AudioPacket packet;
+    AudioPacket packet{};
+
+    std::vector<BYTE> buffer;
 
 public:
     UDPTransmitter(WAVEFORMATEX* _waveFormat, std::string destIP, unsigned short destPort);
