@@ -28,7 +28,7 @@ UDPTransmitter::~UDPTransmitter() {
     WSACleanup();
 }
 
-void UDPTransmitter::bufferUpdated(UINT64 u64DevicePosition, BYTE* data, size_t numFrames) {
+void UDPTransmitter::bufferUpdateCallback(UINT64 u64DevicePosition, BYTE* data, UINT32 numFrames) {
     std::cout << "bufferUpdated()" << std::endl;
 
     packet.UpstreamDevicePosition = u64DevicePosition;

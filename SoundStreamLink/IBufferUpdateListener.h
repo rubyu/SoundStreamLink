@@ -5,5 +5,5 @@
 class IBufferUpdateListener {
 public:
     virtual ~IBufferUpdateListener() = default;
-    virtual void bufferUpdated(UINT64 u64DevicePosition, BYTE* data, size_t numFrames) = 0;
+    virtual void bufferUpdateCallback(UINT64 u64DevicePosition, BYTE* data, UINT32 numFrames) = 0;
 };

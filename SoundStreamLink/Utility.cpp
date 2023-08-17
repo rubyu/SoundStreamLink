@@ -27,14 +27,21 @@ void CheckSocket(SOCKET socket, const char* failedOperation) {
     throw std::runtime_error(errorMessage.get());
 }
 
-void MustEquals(int expected, int actual, const char* failedOperation) {
-    if (expected == actual) return;
+void MustEquals(int mustBe, int actual, const char* failedOperation) {
+    if (mustBe == actual) return;
     const size_t bufferSize = 1024;
     auto errorMessage = std::make_unique<char[]>(bufferSize);
-    sprintf_s(errorMessage.get(), bufferSize, "'%s' failed because expected value '%d (0x%08X)' != actual value '%d (0x%08X)'\n", failedOperation, expected, expected, actual, actual);
+    sprintf_s(errorMessage.get(), bufferSize, "'%s' failed because mustBe value '%d (0x%08X)' != actual value '%d (0x%08X)'\n", failedOperation, mustBe, mustBe, actual, actual);
     throw std::runtime_error(errorMessage.get());
 }
 
+void MustNotEquals(int mustNotBe, int actual, const char* failedOperation) {
+    if (mustNotBe != actual) return;
+    const size_t bufferSize = 1024;
+    auto errorMessage = std::make_unique<char[]>(bufferSize);
+    sprintf_s(errorMessage.get(), bufferSize, "'%s' failed because mustNotBe value '%d (0x%08X)' == actual value '%d (0x%08X)'\n", failedOperation, mustNotBe, mustNotBe, actual, actual);
+    throw std::runtime_error(errorMessage.get());
+}
 
 std::wstring to_wstring(const std::string& stringToConvert) {
     std::wstring wideString = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(stringToConvert);

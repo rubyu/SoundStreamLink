@@ -5,9 +5,10 @@
 #include "AudioCapture.h"
 #include "WavFileWriter.h"
 #include "UDPTransmitter.h"
+#include "UDPReceiver.h"
 #include "Utility.h"
 
-void Server(std::string clientAddress, int clientPort) {
+void Server(std::string clientAddress, const int clientPort) {
     HRESULT hr = CoInitialize(NULL);
     CheckHresult(hr, "CoInitialize");
 
@@ -70,6 +71,21 @@ void Server(std::string clientAddress, int clientPort) {
     std::cout << "Capture Finished" << std::endl;
 
     CoUninitialize();
+}
+
+void Client(const int clientPort) {
+    auto receiver = std::make_unique<UDPReceiver>(clientPort);
+    std::cout << "Receiver Starting\n";
+    receiver->startListening();
+    std::cout << "Receiver Started\n";
+
+    while (true) {
+        Sleep(100);
+    }
+
+    std::cout << "Receiver Finising" << std::endl;
+    receiver->stopListening();
+    std::cout << "Receiver Finished" << std::endl;
 }
 
 void Debug(std::string debugFile) {
@@ -152,6 +168,23 @@ void PrintUsage() {
     std::cout << "-c     Client" << std::endl;
     std::cout << "" << std::endl;
     std::cout << "Options (complementary):" << std::endl;
+    std::cout << "-ca <address>    For server mode. Specify client address." << std::endl;
+    std::cout << "-cp <port>       For server and client mode. Specify client port. (default: 30816)" << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << "Examples of Commands:" << std::endl;
+    std::cout << "==Start server==" << std::endl;
+    std::cout << "SoundStreamLink.exe -s -ca 192.0.2.2" << std::endl;
+    std::cout << "==Start client==" << std::endl;
+    std::cout << "SoundStreamLink.exe -c" << std::endl;
+
+    /*
+    std::cout << "SoundStreamLink.exe [mode] [option1 option2 ...]" << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << "Modes (mandatory):" << std::endl;
+    std::cout << "-s     Server" << std::endl;
+    std::cout << "-c     Client" << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << "Options (complementary):" << std::endl;
     std::cout << "-sa <address>    For client mode. Specify server address." << std::endl;
     std::cout << "-sp <port>       For server and client mode. Specify server port. (default: 30815)" << std::endl;
     std::cout << "-ca <address>    For server mode. Specify client address." << std::endl;
@@ -162,6 +195,7 @@ void PrintUsage() {
     std::cout << "SoundStreamLink.exe -s -ca 192.0.2.2" << std::endl;
     std::cout << "==Start client==" << std::endl;
     std::cout << "SoundStreamLink.exe -c -sa 192.0.2.1" << std::endl;
+    */
 }
 
 void PrintCommandLineError(const char* errorMessage) {
@@ -243,6 +277,7 @@ int main(int argc, char** argv) {
     }
     else if (clientMode) {
         std::cout << "Mode: Client" << std::endl;
+        /*
         if (!serverAddress.empty()) {
             PrintCommandLineError("Server Address (-sa) is required.");
             return 1;
@@ -253,8 +288,13 @@ int main(int argc, char** argv) {
             serverPort = 30815;
         }
         std::cout << "Server Port: " << serverPort << std::endl;
+        */
+        if (!clientPort) {
+            clientPort = 30816;
+        }
+        std::cout << "Client Port: " << clientPort << std::endl;
 
-        //Client();
+        Client(clientPort);
     }
 
     return 0;

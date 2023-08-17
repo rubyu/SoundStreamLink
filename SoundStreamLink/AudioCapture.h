@@ -25,7 +25,7 @@ public:
     size_t CalculateFramesForDurationSeconds(const WAVEFORMATEX& format, double seconds);
     void Start();
     void Stop();
-    size_t BufferRead(UINT64 u64DevicePosition, BYTE* output, size_t numFrames);
+    size_t BufferRead(UINT64 u64DevicePosition, BYTE* output, UINT32 numFrames);
     size_t BufferReadAll(BYTE* output);
     size_t GetTotalWrittenFrames() const;
     size_t GetTotalZeroFilledFrames() const;

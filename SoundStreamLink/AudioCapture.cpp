@@ -105,7 +105,7 @@ void AudioCapture::Stop() {
     terminated = true;
 }
 
-size_t AudioCapture::BufferRead(UINT64 u64DevicePosition, BYTE* output, size_t numFrames) {
+size_t AudioCapture::BufferRead(UINT64 u64DevicePosition, BYTE* output, UINT32 numFrames) {
     mtx.lock();
     size_t ret = ringBuffer->Read(u64DevicePosition, output, numFrames);
     mtx.unlock();

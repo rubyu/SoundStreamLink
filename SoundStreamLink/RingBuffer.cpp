@@ -41,11 +41,11 @@ RingBuffer::RingBuffer(const WAVEFORMATEX& format, size_t numFrames)
     totalZeroFilledFrames(0),
     currentZeroFilledFrames(0) {}
 
-void RingBuffer::Write(UINT64 u64DevicePosition, BYTE* data, size_t numFrames) {
+void RingBuffer::Write(UINT64 u64DevicePosition, BYTE* data, UINT32 numFrames) {
     if (numFrames == 0) return;
 
     for (auto& listener : updateListeners) {
-        listener->bufferUpdated(u64DevicePosition, data, numFrames);
+        listener->bufferUpdateCallback(u64DevicePosition, data, numFrames);
     }
 
     if (IsInitialState()) {
@@ -81,7 +81,7 @@ void RingBuffer::Write(UINT64 u64DevicePosition, BYTE* data, size_t numFrames) {
     std::cout << "tail_upstream_sync_pos: " << tail_upstream_sync_pos << std::endl;
 }
 
-size_t RingBuffer::Read(UINT64 u64DevicePosition, BYTE* output, size_t numFrames) {
+size_t RingBuffer::Read(UINT64 u64DevicePosition, BYTE* output, UINT32 numFrames) {
     assert(head != tail);
     assert(head_upstream_sync_pos <= u64DevicePosition);
     assert(u64DevicePosition <= tail_upstream_sync_pos);

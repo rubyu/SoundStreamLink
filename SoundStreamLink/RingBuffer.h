@@ -37,8 +37,8 @@ private:
 
 public:
     RingBuffer(const WAVEFORMATEX& format, size_t numFrames);
-    void Write(UINT64 u64DevicePosition, BYTE* data, size_t numFrames);
-    size_t Read(UINT64 u64DevicePosition, BYTE* output, size_t numFrames);
+    void Write(UINT64 u64DevicePosition, BYTE* data, UINT32 numFrames);
+    size_t Read(UINT64 u64DevicePosition, BYTE* output, UINT32 numFrames);
     size_t ReadAll(BYTE* output);
 
     size_t GetTotalWrittenFrames() const;

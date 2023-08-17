@@ -21,5 +21,5 @@ public:
     UDPTransmitter(WAVEFORMATEX* _waveFormat, std::string destIP, unsigned short destPort);
     ~UDPTransmitter();
 
-    void bufferUpdated(UINT64 u64DevicePosition, BYTE* data, size_t numFrames);
+    void bufferUpdateCallback(UINT64 u64DevicePosition, BYTE* data, UINT32 numFrames);
 };
