@@ -13,7 +13,7 @@ struct AudioPacket {
     UINT64 UpstreamDevicePosition;
     UINT32 Frames;
     UINT32 DataSize;
-    BYTE* Data;
+    std::unique_ptr<BYTE[]> Data;
 
     AudioPacket() :
         SamplingRate(0),

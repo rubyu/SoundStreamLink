@@ -62,10 +62,8 @@ bool UDPReceiver::DecodeAudioPacket(const char* data, int dataSize, AudioPacket&
     if (dataSize < (headerSize + packet.DataSize)) {
         return false;
     }
-
-    packet.Data = new BYTE[packet.DataSize];
-    memcpy(packet.Data, ptr, packet.DataSize);
-
+    packet.Data = std::make_unique<BYTE[]>(packet.DataSize);
+    memcpy(packet.Data.get(), ptr, packet.DataSize);
     return true;
 }
 
@@ -102,7 +100,7 @@ void UDPReceiver::listenLoop() {
 
         std::cout << std::dec << "AudioPacket(SamplingRate=" << packet.SamplingRate << ", Channels=" << packet.Channels <<
             ", BitsPerSample=" << packet.BitsPerSample << ", UpstreamDevicePosition=" << packet.UpstreamDevicePosition <<
-            ", Frames=" << packet.Frames << ", DataSize=" << packet.DataSize << ")" << std::endl;           
+            ", Frames=" << packet.Frames << ", DataSize=" << packet.DataSize << ")" << std::endl;  
     }
 }
 
