@@ -2,11 +2,12 @@
 #include <atlbase.h>
 #include <atlcom.h>
 #include "RingBuffer.h"
-#include "AudioCapture.h"
+#include "AudioStreamSource.h"
+#include "AudioStreamSink.h"
+#include "Utility.h"
 #include "WavFileWriter.h"
 #include "UDPTransmitter.h"
 #include "UDPReceiver.h"
-#include "Utility.h"
 
 void Server(std::string clientAddress, const int clientPort) {
     HRESULT hr = CoInitialize(NULL);
@@ -54,9 +55,9 @@ void Server(std::string clientAddress, const int clientPort) {
     std::cout << "hnsDefaultDevicePeriod (in 100ns): " << hnsDefaultDevicePeriod << " (" << hnsDefaultDevicePeriod / 10000 << "ms)" << std::endl;
     std::cout << "hnsMinimumDevicePeriod (in 100ns): " << hnsMinimumDevicePeriod << " (" << hnsMinimumDevicePeriod / 10000 << "ms)" << std::endl;
 
-    auto audioCapture = std::make_unique<AudioCapture>(pAudioClient);
+    auto audioCapture = std::make_unique<AudioStreamSource>(pAudioClient);
     auto transmitter = std::make_unique<UDPTransmitter>(pFormat, clientAddress, clientPort);
-    audioCapture->addUpdateListener(std::move(transmitter));
+    audioCapture->AddListener(std::move(transmitter));
 
     std::cout << "Capture Starting\n";
     audioCapture->Start();
@@ -75,8 +76,11 @@ void Server(std::string clientAddress, const int clientPort) {
 
 void Client(const int clientPort) {
     auto receiver = std::make_unique<UDPReceiver>(clientPort);
+    auto sink = std::make_unique<AudioStreamSink>();
+    receiver->AddListener(std::move(sink));
+    
     std::cout << "Receiver Starting\n";
-    receiver->startListening();
+    receiver->StartListening();
     std::cout << "Receiver Started\n";
 
     while (true) {
@@ -84,7 +88,7 @@ void Client(const int clientPort) {
     }
 
     std::cout << "Receiver Finising" << std::endl;
-    receiver->stopListening();
+    receiver->StopListening();
     std::cout << "Receiver Finished" << std::endl;
 }
 
@@ -134,7 +138,11 @@ void Debug(std::string debugFile) {
     std::cout << "hnsDefaultDevicePeriod (in 100ns): " << hnsDefaultDevicePeriod << " (" << hnsDefaultDevicePeriod / 10000 << "ms)" << std::endl;
     std::cout << "hnsMinimumDevicePeriod (in 100ns): " << hnsMinimumDevicePeriod << " (" << hnsMinimumDevicePeriod / 10000 << "ms)" << std::endl;
 
-    auto audioCapture = std::make_unique<AudioCapture>(pAudioClient);
+    auto audioCapture = std::make_unique<AudioStreamSource>(pAudioClient);
+    const size_t MAX_CAPTURE_FRAMES = CalculateFramesForDurationSeconds(pFormat->nSamplesPerSec, pFormat->nChannels, 5);
+    auto ringBuffer = std::make_shared<RingBuffer>(*pFormat, MAX_CAPTURE_FRAMES);
+    
+    audioCapture->AddListener(ringBuffer);
 
     std::cout << "Capture Starting\n";
     audioCapture->Start();
@@ -149,11 +157,11 @@ void Debug(std::string debugFile) {
     std::cout << "Capture Finished" << std::endl;
 
     std::cout << "wav file saving" << std::endl;
-    size_t neededCapacity = audioCapture->GetCurrentValidFrames() * pFormat->nBlockAlign;
+    size_t neededCapacity = ringBuffer->GetCurrentValidFrames() * pFormat->nBlockAlign;
     std::cout << "neededCapacity: " << neededCapacity << std::endl;
     std::vector<BYTE> readBuffer(neededCapacity, 0);
     std::cout << "readBuffer.size(): " << readBuffer.size() << std::endl;
-    size_t readFrames = audioCapture->BufferReadAll(readBuffer.data());
+    size_t readFrames = ringBuffer->ReadAll(readBuffer.data());
     WavFileWriter::WriteWaveFile(debugFile, readBuffer, *pFormat);
     std::cout << "wav file saved" << std::endl;
 

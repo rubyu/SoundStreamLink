@@ -47,3 +47,8 @@ std::wstring to_wstring(const std::string& stringToConvert) {
     std::wstring wideString = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(stringToConvert);
     return wideString;
 }
+
+size_t CalculateFramesForDurationSeconds(DWORD nSamplesPerSec, WORD nChannels, double seconds) {
+    size_t totalFrames = static_cast<size_t>(seconds * nSamplesPerSec) / nChannels;
+    return totalFrames;
+}

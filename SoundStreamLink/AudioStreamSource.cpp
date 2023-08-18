@@ -1,16 +1,17 @@
-#include "AudioCapture.h"
+#include "AudioStreamSource.h"
+#include <iostream>
+#include <cassert>
 #include <bitset>
 #include <avrt.h>
 #pragma comment(lib, "avrt.lib")
 #include "Utility.h"
 
-
-DWORD WINAPI AudioCapture::WASAPICaptureThreadWrapper(LPVOID pThis) {
-    AudioCapture* audioCapture = static_cast<AudioCapture*>(pThis);
+DWORD WINAPI AudioStreamSource::WASAPICaptureThreadWrapper(LPVOID pThis) {
+    AudioStreamSource* audioCapture = static_cast<AudioStreamSource*>(pThis);
     return audioCapture->WASAPICaptureThread();
 }
 
-DWORD AudioCapture::WASAPICaptureThread() {
+DWORD AudioStreamSource::WASAPICaptureThread() {
     HRESULT hr = CoInitialize(NULL);
     CheckHresult(hr, "CoInitialize");
 
@@ -37,17 +38,11 @@ DWORD AudioCapture::WASAPICaptureThread() {
         std::cout << "flags->AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR: " << (flags & AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR) << std::endl;
         std::cout << "u64DevicePosition: " << u64DevicePosition << std::endl;
         std::cout << "u64QPCPosition: " << u64QPCPosition << std::endl;
-
-        std::cout << "Buffer Statistics:" << std::endl;
-        std::cout << "Buffer->TotalWrittenFrames: " << ringBuffer->GetTotalWrittenFrames() << std::endl;
-        std::cout << "Buffer->TotalZeroFilledFrames: " << ringBuffer->GetTotalZeroFilledFrames() << std::endl;
-        std::cout << "Buffer->CurrentValidFrames: " << ringBuffer->GetCurrentValidFrames() << std::endl;
-        std::cout << "Buffer->CurrentZeroFilledFrames: " << ringBuffer->GetCurrentZeroFilledFrames() << std::endl;
 #endif // DEBUG
         if (numFramesToRead > 0) {
-            mtx.lock();
-            ringBuffer->Write(u64DevicePosition, pData, numFramesToRead);
-            mtx.unlock();
+            for (auto& listener : listeners) {
+                listener->AudioStreamSourceBufferPreparedCallback(u64DevicePosition, pData, numFramesToRead);
+            }
 
             hr = pCaptureClient->ReleaseBuffer(numFramesToRead);
             CheckHresult(hr, "pCaptureClient->ReleaseBuffer");
@@ -57,12 +52,12 @@ DWORD AudioCapture::WASAPICaptureThread() {
     return 0;
 }
 
-void AudioCapture::startCaptureThread() {
+void AudioStreamSource::startCaptureThread() {
     HANDLE handle = CreateThread(NULL, 0, WASAPICaptureThreadWrapper, this, 0, NULL);
     CheckHandle(handle, "CreateThead for WASAPICaptureThreadWrapper");
 }
 
-AudioCapture::AudioCapture(CComPtr<IAudioClient> audioClient)
+AudioStreamSource::AudioStreamSource(CComPtr<IAudioClient> audioClient)
     : pAudioClient(audioClient) {
     initialized = false;
     terminated = false;
@@ -73,18 +68,10 @@ AudioCapture::AudioCapture(CComPtr<IAudioClient> audioClient)
     hr = pAudioClient->GetMixFormat(&pFormat);
     CheckHresult(hr, "pAudioClient->GetMixFormat");
 
-    const size_t MAX_CAPTURE_FRAMES = CalculateFramesForDurationSeconds(*pFormat, 5);
-    ringBuffer = std::make_unique<RingBuffer>(*pFormat, MAX_CAPTURE_FRAMES);
+    const size_t MAX_CAPTURE_FRAMES = CalculateFramesForDurationSeconds(pFormat->nSamplesPerSec, pFormat->nChannels, 5);
 }
 
-size_t AudioCapture::CalculateFramesForDurationSeconds(const WAVEFORMATEX& format, double seconds) {
-    size_t totalSamples = static_cast<size_t>(seconds * format.nSamplesPerSec);
-    size_t samplesPerFrame = format.nBlockAlign / (format.wBitsPerSample / 8 * format.nChannels);
-    size_t totalFrames = totalSamples / samplesPerFrame;
-    return totalFrames;
-}
-
-void AudioCapture::Start() {
+void AudioStreamSource::Start() {
     assert(initialized == false);
     assert(terminated == false);
     initialized = true;
@@ -96,7 +83,7 @@ void AudioCapture::Start() {
     std::cout << "CaptureThread has been started" << std::endl;
 }
 
-void AudioCapture::Stop() {
+void AudioStreamSource::Stop() {
     assert(initialized == true);
     assert(terminated == false);
     HRESULT hr = pAudioClient->Stop();
@@ -105,41 +92,10 @@ void AudioCapture::Stop() {
     terminated = true;
 }
 
-size_t AudioCapture::BufferRead(UINT64 u64DevicePosition, BYTE* output, UINT32 numFrames) {
-    mtx.lock();
-    size_t ret = ringBuffer->Read(u64DevicePosition, output, numFrames);
-    mtx.unlock();
-    return ret;
+void AudioStreamSource::AddListener(std::shared_ptr<IAudioStreamSourceBufferPreparedEventListener>&& newListener) {
+    listeners.push_back(newListener);
 }
 
-size_t AudioCapture::BufferReadAll(BYTE* output) {
-    mtx.lock();
-    size_t ret = ringBuffer->ReadAll(output);
-    mtx.unlock();
-    return ret;
-}
-
-size_t AudioCapture::GetTotalWrittenFrames() const {
-    return ringBuffer->GetTotalWrittenFrames();
-}
-
-size_t AudioCapture::GetTotalZeroFilledFrames() const {
-    return ringBuffer->GetTotalZeroFilledFrames();
-}
-
-size_t AudioCapture::GetCurrentValidFrames() const {
-    return ringBuffer->GetCurrentValidFrames();
-}
-
-size_t AudioCapture::GetCurrentZeroFilledFrames() const {
-    return ringBuffer->GetCurrentZeroFilledFrames();
-}
-
-
-void AudioCapture::addUpdateListener(std::unique_ptr<IBufferUpdateListener>&& newListener) {
-    ringBuffer->addUpdateListener(std::move(newListener));
-}
-
-void AudioCapture::clearUpdateListeners() {
-    ringBuffer->clearUpdateListeners();
+void AudioStreamSource::ClearListeners() {
+    listeners.clear();
 }

@@ -27,12 +27,12 @@ UDPReceiver::UDPReceiver(unsigned short listenPort)
     MustNotEquals(SOCKET_ERROR, result, "bind()");
 }
 
-void UDPReceiver::startListening() {
+void UDPReceiver::StartListening() {
     listening = true;
-    listenThread = std::thread(&UDPReceiver::listenLoop, this);
+    listenThread = std::thread(&UDPReceiver::ListenLoop, this);
 }
 
-void UDPReceiver::stopListening() {
+void UDPReceiver::StopListening() {
     listening = false;
     if (listenThread.joinable()) {
         listenThread.join();
@@ -67,7 +67,7 @@ bool UDPReceiver::DecodeAudioPacket(const char* data, int dataSize, AudioPacket&
     return true;
 }
 
-void UDPReceiver::listenLoop() {
+void UDPReceiver::ListenLoop() {
     sockaddr_in from{};
     int fromSize = sizeof(from);
     int receivedBytes;
@@ -101,13 +101,25 @@ void UDPReceiver::listenLoop() {
         std::cout << std::dec << "AudioPacket(SamplingRate=" << packet.SamplingRate << ", Channels=" << packet.Channels <<
             ", BitsPerSample=" << packet.BitsPerSample << ", UpstreamDevicePosition=" << packet.UpstreamDevicePosition <<
             ", Frames=" << packet.Frames << ", DataSize=" << packet.DataSize << ")" << std::endl;  
+
+        for (auto& listener : listeners) {
+            listener->UDPReceiverBufferPreparedCallback(&packet);
+        }
     }
 }
 
 UDPReceiver::~UDPReceiver() {
     if (listening) {
-        stopListening();
+        StopListening();
     }
     closesocket(udpSocket);
     WSACleanup();
+}
+
+void UDPReceiver::AddListener(std::shared_ptr<IUDPReceiverBufferPreparedEventListener>&& newListener) {
+    listeners.push_back(newListener);
+}
+
+void UDPReceiver::ClearListeners() {
+    listeners.clear();
 }

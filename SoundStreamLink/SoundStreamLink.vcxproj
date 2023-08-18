@@ -127,8 +127,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AudioCapture.cpp" />
-    <ClCompile Include="IBufferUpdateListener.h" />
+    <ClCompile Include="AudioStreamSource.cpp" />
+    <ClCompile Include="AudioStreamSink.cpp" />
+    <ClCompile Include="IAudioStreamSourceBufferPreparedEventListener.h" />
     <ClCompile Include="RingBuffer.cpp" />
     <ClCompile Include="SoundStreamLink.cpp" />
     <ClCompile Include="UDPReceiver.cpp" />
@@ -137,8 +138,10 @@
     <ClCompile Include="WavFileWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AudioCapture.h" />
+    <ClInclude Include="AudioStreamSource.h" />
     <ClInclude Include="AudioPacket.h" />
+    <ClInclude Include="AudioStreamSink.h" />
+    <ClInclude Include="IUDPReceiverBufferPreparedEventListener.h" />
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="UDPReceiver.h" />
     <ClInclude Include="UDPTransmitter.h" />

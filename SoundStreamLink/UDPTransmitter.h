@@ -6,9 +6,9 @@
 #include <winsock2.h>
 #include <Audioclient.h>
 #include "AudioPacket.h"
-#include "IBufferUpdateListener.h"
+#include "IAudioStreamSourceBufferPreparedEventListener.h"
 
-class UDPTransmitter : public IBufferUpdateListener {
+class UDPTransmitter : public IAudioStreamSourceBufferPreparedEventListener {
 private:
     SOCKET udpSocket;
     sockaddr_in destAddr;
@@ -21,5 +21,5 @@ public:
     UDPTransmitter(WAVEFORMATEX* _waveFormat, std::string destIP, unsigned short destPort);
     ~UDPTransmitter();
 
-    void bufferUpdateCallback(UINT64 u64DevicePosition, BYTE* data, UINT32 numFrames);
+    void AudioStreamSourceBufferPreparedCallback(UINT64 u64DevicePosition, BYTE* data, UINT32 numFrames);
 };

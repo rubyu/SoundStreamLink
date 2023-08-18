@@ -6,9 +6,9 @@
 #include <iostream>
 #include <Mmdeviceapi.h>
 #include <functiondiscoverykeys.h>
-#include "IBufferUpdateListener.h"
+#include "IAudioStreamSourceBufferPreparedEventListener.h"
 
-class RingBuffer {
+class RingBuffer : public IAudioStreamSourceBufferPreparedEventListener {
 private:
     std::vector<BYTE> buffer;
     size_t head;
@@ -25,9 +25,6 @@ private:
     size_t totalZeroFilledFrames;
     size_t currentZeroFilledFrames;
     std::set<size_t> zeroFilledPositions;
-
-    // listener feature
-    std::vector<std::unique_ptr<IBufferUpdateListener>> updateListeners;
 
     // buffer oparations
     void IncrementHead();
@@ -46,6 +43,5 @@ public:
     size_t GetCurrentValidFrames() const;
     size_t GetCurrentZeroFilledFrames() const;
 
-    void addUpdateListener(std::unique_ptr<IBufferUpdateListener>&& newTransmitter);
-    void clearUpdateListeners();
+    void AudioStreamSourceBufferPreparedCallback(UINT64 u64DevicePosition, BYTE* data, UINT32 numFrames);
 };
