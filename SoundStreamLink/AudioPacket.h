@@ -4,6 +4,8 @@
 #include <Audioclient.h>
 
 struct AudioPacket {
+    //todo: timestamp
+
     // Audio stream format.
     UINT32 SamplingRate;     // Sampling Frequency in Hz
     UINT16 Channels;         // Number of channels 1=Mono 2=Sterio

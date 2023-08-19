@@ -10,13 +10,21 @@
 
 class AudioStreamSink : public IUDPReceiverBufferPreparedEventListener {
 private:
+    UINT32 samplingRate;
+    UINT16 channels;
+    UINT16 bitsPerSample;
+
     std::vector<BYTE> buffer;
 
     size_t head;
     size_t head_upstream_sync_pos;
     size_t tail;
     size_t tail_upstream_sync_pos;
+
     size_t highest_upstream_sync_pos;
+    //todo: downstream_sync_pos
+
+
 
     // from WAVEFORMATEX
     size_t totalBufferCapacityInFrames; // Capacity of the buffer (in frames)
@@ -30,9 +38,14 @@ private:
 
 public:
     AudioStreamSink();
+
     void Write(UINT64 u64DevicePosition, BYTE* data, UINT32 numFrames);
     size_t Read(BYTE* output, UINT32 numFrames);
     void CommitRead(UINT32 numFrames);
+
+    UINT32 GetSamplingRate();
+    UINT16 GetChannels();
+    UINT16 GetBitsPerSample();
 
     size_t GetTotalWrittenFrames() const;
     size_t GetSyncedFrames() const;

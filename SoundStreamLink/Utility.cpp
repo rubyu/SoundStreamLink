@@ -48,7 +48,8 @@ std::wstring to_wstring(const std::string& stringToConvert) {
     return wideString;
 }
 
-size_t CalculateFramesForDurationSeconds(DWORD nSamplesPerSec, WORD nChannels, double seconds) {
+size_t CalculateFramesForDurationMilliseconds(DWORD nSamplesPerSec, WORD nChannels, double ms) {
+    double seconds = ms / 1000.0;
     size_t totalFrames = static_cast<size_t>(seconds * nSamplesPerSec) / nChannels;
     return totalFrames;
 }

@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AudioRenderer.cpp" />
     <ClCompile Include="AudioStreamSource.cpp" />
     <ClCompile Include="AudioStreamSink.cpp" />
     <ClCompile Include="IAudioStreamSourceBufferPreparedEventListener.h" />
@@ -138,6 +139,7 @@
     <ClCompile Include="WavFileWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AudioRenderer.h" />
     <ClInclude Include="AudioStreamSource.h" />
     <ClInclude Include="AudioPacket.h" />
     <ClInclude Include="AudioStreamSink.h" />

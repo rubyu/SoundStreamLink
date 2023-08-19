@@ -58,17 +58,15 @@ void AudioStreamSource::startCaptureThread() {
 }
 
 AudioStreamSource::AudioStreamSource(CComPtr<IAudioClient> audioClient)
-    : pAudioClient(audioClient) {
-    initialized = false;
-    terminated = false;
+    : pAudioClient(audioClient), 
+    initialized(false), 
+    terminated(false) {
 
     HRESULT hr = pAudioClient->GetService(__uuidof(IAudioCaptureClient), (void**)&pCaptureClient);
     CheckHresult(hr, "pAudioClient->GetService");
 
     hr = pAudioClient->GetMixFormat(&pFormat);
     CheckHresult(hr, "pAudioClient->GetMixFormat");
-
-    const size_t MAX_CAPTURE_FRAMES = CalculateFramesForDurationSeconds(pFormat->nSamplesPerSec, pFormat->nChannels, 5);
 }
 
 void AudioStreamSource::Start() {

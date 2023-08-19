@@ -8,6 +8,7 @@
 #include "WavFileWriter.h"
 #include "UDPTransmitter.h"
 #include "UDPReceiver.h"
+#include "AudioRenderer.h"
 
 void Server(std::string clientAddress, const int clientPort) {
     HRESULT hr = CoInitialize(NULL);
@@ -76,12 +77,17 @@ void Server(std::string clientAddress, const int clientPort) {
 
 void Client(const int clientPort) {
     auto receiver = std::make_unique<UDPReceiver>(clientPort);
-    auto sink = std::make_unique<AudioStreamSink>();
-    receiver->AddListener(std::move(sink));
+    auto sink = std::make_shared<AudioStreamSink>();
+    receiver->AddListener(sink);
     
     std::cout << "Receiver Starting\n";
     receiver->StartListening();
     std::cout << "Receiver Started\n";
+
+    auto renderer = std::make_unique<AudioRenderer>(sink);
+    std::cout << "Renderer Starting\n";
+    renderer->Start();
+    std::cout << "Renderer Started\n";
 
     while (true) {
         Sleep(100);
@@ -139,7 +145,7 @@ void Debug(std::string debugFile) {
     std::cout << "hnsMinimumDevicePeriod (in 100ns): " << hnsMinimumDevicePeriod << " (" << hnsMinimumDevicePeriod / 10000 << "ms)" << std::endl;
 
     auto audioCapture = std::make_unique<AudioStreamSource>(pAudioClient);
-    const size_t MAX_CAPTURE_FRAMES = CalculateFramesForDurationSeconds(pFormat->nSamplesPerSec, pFormat->nChannels, 5);
+    const size_t MAX_CAPTURE_FRAMES = CalculateFramesForDurationMilliseconds(pFormat->nSamplesPerSec, pFormat->nChannels, 5000);
     auto ringBuffer = std::make_shared<RingBuffer>(*pFormat, MAX_CAPTURE_FRAMES);
     
     audioCapture->AddListener(ringBuffer);

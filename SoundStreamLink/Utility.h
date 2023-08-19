@@ -13,4 +13,4 @@ void MustNotEquals(int mustNotBe, int actual, const char* failedOperation);
 
 std::wstring to_wstring(const std::string& stringToConvert);
 
-size_t CalculateFramesForDurationSeconds(DWORD nSamplesPerSec, WORD nChannels, double seconds);
+size_t CalculateFramesForDurationMilliseconds(DWORD nSamplesPerSec, WORD nChannels, double ms);
