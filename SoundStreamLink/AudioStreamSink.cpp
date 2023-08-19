@@ -32,7 +32,9 @@ UINT16 AudioStreamSink::GetBitsPerSample() {
 
 void AudioStreamSink::Write(UINT64 u64DevicePosition, BYTE* data, UINT32 numFrames) {
     if (0 == numFrames) return;
-    assert(0 <= u64DevicePosition);
+    assert(0 < u64DevicePosition);
+    assert(0 < totalBufferCapacityInFrames);
+    assert(0 < frameSize);
     
     if (NeedInitialization()) {
         head_upstream_sync_pos = u64DevicePosition;
@@ -42,9 +44,9 @@ void AudioStreamSink::Write(UINT64 u64DevicePosition, BYTE* data, UINT32 numFram
     assert(head != tail);
     size_t upstream_pos = u64DevicePosition;
     size_t buffer_pos;
-
-    size_t overflow = tail_upstream_sync_pos - upstream_pos;
-    if (0 < overflow) {
+    size_t overflow;
+    if (tail_upstream_sync_pos < upstream_pos) {
+        overflow = upstream_pos - tail_upstream_sync_pos;
         std::cout << "fill the gap with zero: " << overflow << " frames" << std::endl;
         buffer_pos = tail + 1;
         for (size_t i = 0; i < overflow; i++) {
@@ -76,7 +78,7 @@ void AudioStreamSink::Write(UINT64 u64DevicePosition, BYTE* data, UINT32 numFram
     }
 
     if (tail_upstream_sync_pos < upstream_pos) {
-        overflow = tail_upstream_sync_pos - upstream_pos;
+        overflow = upstream_pos - tail_upstream_sync_pos;
         std::cout << "overwrite: " << overflow << " frames" << std::endl;
         head = (head + overflow) % totalBufferCapacityInFrames;
         head_upstream_sync_pos += overflow;

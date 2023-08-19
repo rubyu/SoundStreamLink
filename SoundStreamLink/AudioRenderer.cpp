@@ -80,7 +80,7 @@ DWORD AudioRenderer::WASAPIRenderThread() {
     hr = pAudioClient->GetService(__uuidof(IAudioRenderClient), (void**)&pRenderClient);
     CheckHresult(hr, "pAudioClient->GetService");
 
-    const size_t upstream_buffer_size = bufferFrames * bufferFrames * nBlockAlign;
+    const size_t upstream_buffer_size = bufferFrames * nBlockAlign;
     std::vector<BYTE> upstream_buffer(bufferFrames * nBlockAlign, 0);
     BYTE* downstream_buffer = NULL;
 
@@ -93,15 +93,13 @@ DWORD AudioRenderer::WASAPIRenderThread() {
 
     std::cout << "Start playing" << std::endl;
     while (!terminated) {
-        std::cout << "loop" << std::endl;
         UINT32 padding = 0;
         hr = pAudioClient->GetCurrentPadding(&padding);
         CheckHresult(hr, "pAudioClient->GetCurrentPadding()");
 
         UINT32 availableSpace = upstream_buffer_size / pwfx->nBlockAlign - padding; // frames
-        std::cout << "availableSpace: " << availableSpace << std::endl;
-
         if (0 < availableSpace) {
+            std::cout << "availableSpace: " << availableSpace << std::endl;
             sink->Read(upstream_buffer.data(), availableSpace);
             std::cout << "sink->Read(): " << availableSpace << std::endl;
 
