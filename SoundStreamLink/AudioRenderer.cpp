@@ -42,6 +42,15 @@ DWORD AudioRenderer::WASAPIRenderThread() {
     hr = pEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &pDevice);
     CheckHresult(hr, "pEnumerator->GetDefaultAudioEndpoint");
 
+    IPropertyStore* pProps = NULL;
+    PROPVARIANT varName;
+    PropVariantInit(&varName);
+    pDevice->OpenPropertyStore(STGM_READ, &pProps);
+    pProps->GetValue(PKEY_Device_FriendlyName, &varName);
+    std::wcout << L"Playing device: " << varName.pwszVal << std::endl;
+    PropVariantClear(&varName);
+    pProps->Release();
+
     hr = pDevice->Activate(__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&pAudioClient);
     CheckHresult(hr, "pDevice->Activate");
 
@@ -85,7 +94,9 @@ DWORD AudioRenderer::WASAPIRenderThread() {
     BYTE* downstream_buffer = NULL;
 
     // truncate the upstream buffer size to bufferFrames.
-    sink->CommitRead(sink->GetSyncedFrames() - bufferFrames);
+    if (bufferFrames < sink->GetSyncedFrames()) {
+        sink->CommitRead(sink->GetSyncedFrames() - bufferFrames);
+    }
 
     hr = pAudioClient->Start();
     CheckHresult(hr, "pAudioClient->Start()");

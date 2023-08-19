@@ -34,7 +34,6 @@ void UDPTransmitter::AudioStreamSourceBufferPreparedCallback(UINT64 u64DevicePos
     packet.UpstreamDevicePosition = u64DevicePosition;
     packet.Frames = numFrames;
     packet.DataSize = numFrames * (packet.Channels * (packet.BitsPerSample / 8));
-    packet.Data = std::make_unique<BYTE[]>(packet.DataSize);
 
     int headerSize = sizeof(packet.SamplingRate) + sizeof(packet.Channels) + sizeof(packet.BitsPerSample)
         + sizeof(packet.UpstreamDevicePosition) + sizeof(packet.Frames) + sizeof(packet.DataSize);
@@ -49,7 +48,7 @@ void UDPTransmitter::AudioStreamSourceBufferPreparedCallback(UINT64 u64DevicePos
     memcpy(ptr, &packet.UpstreamDevicePosition, sizeof(packet.UpstreamDevicePosition)); ptr += sizeof(packet.UpstreamDevicePosition);
     memcpy(ptr, &packet.Frames, sizeof(packet.Frames));                                 ptr += sizeof(packet.Frames);
     memcpy(ptr, &packet.DataSize, sizeof(packet.DataSize));                             ptr += sizeof(packet.DataSize);
-    memcpy(ptr, packet.Data.get(), packet.DataSize);
+    memcpy(ptr, data, packet.DataSize);
 
     std::cout << std::dec << "AudioPacket(SamplingRate=" << packet.SamplingRate << ", Channels=" << packet.Channels <<
         ", BitsPerSample=" << packet.BitsPerSample << ", UpstreamDevicePosition=" << packet.UpstreamDevicePosition <<

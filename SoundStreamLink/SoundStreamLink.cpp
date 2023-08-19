@@ -22,6 +22,15 @@ void Server(std::string clientAddress, const int clientPort) {
     hr = pEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &pDevice);
     CheckHresult(hr, "pEnumerator->GetDefaultAudioEndpoint");
 
+    IPropertyStore* pProps = NULL;
+    PROPVARIANT varName;
+    PropVariantInit(&varName);
+    pDevice->OpenPropertyStore(STGM_READ, &pProps);
+    pProps->GetValue(PKEY_Device_FriendlyName, &varName);
+    std::wcout << L"Playing device: " << varName.pwszVal << std::endl;
+    PropVariantClear(&varName);
+    pProps->Release();
+
     CComPtr<IAudioClient> pAudioClient = NULL;
     hr = pDevice->Activate(__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&pAudioClient);
     CheckHresult(hr, "pDevice->Activate");
